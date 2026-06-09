@@ -1,73 +1,138 @@
-# React + TypeScript + Vite
+# Expense Tracker Analytics Platform (AWS Cloud Project)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+Expense Tracker Analytics Platform is a serverless cloud-based application that allows users to upload expense CSV files, automatically process transaction data, store files in AWS S3, generate analytics using AWS Lambda, and visualize spending insights through an interactive dashboard.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The project demonstrates the use of modern cloud technologies and data processing workflows using AWS services.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+* Upload expense CSV files
+* Store raw files in Amazon S3
+* Process uploaded data using AWS Lambda
+* Store analytics results in Amazon DynamoDB
+* Automatic currency normalization to INR (₹)
+* Dashboard for spending analysis
+* Category-wise expenditure breakdown
+* Total spending and transaction summaries
+* Serverless architecture with AWS
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## AWS Services Used
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Amazon S3
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* Stores uploaded raw expense files
+
+### AWS Lambda
+
+* Processes uploaded CSV files
+* Calculates spending analytics
+* Converts supported currencies to INR
+
+### Amazon DynamoDB
+
+* Stores processed analytics and metadata
+
+### Amazon API Gateway
+
+* Provides REST API endpoints for frontend communication
+
+---
+
+## Architecture
+
+User Upload CSV
+↓
+React Frontend
+↓
+API Gateway
+↓
+ExpenseProcessor Lambda
+↓
+Amazon S3 (Raw Files)
+↓
+Amazon DynamoDB (Analytics)
+↓
+ExpenseSummary Lambda
+↓
+Dashboard Visualization
+
+---
+
+## Dashboard Metrics
+
+* Total Spending
+* Total Transactions
+* Top Spending Category
+* Monthly Spending Overview
+* Category Breakdown Charts
+
+---
+
+## Technologies Used
+
+### Frontend
+
+* React
+* TypeScript
+* Vite
+* Tailwind CSS
+
+### Backend
+
+* AWS Lambda (Python)
+* API Gateway
+
+### Database
+
+* Amazon DynamoDB
+
+### Storage
+
+* Amazon S3
+
+---
+
+## Sample CSV Format
+
+```csv
+Category,Amount
+Food,500
+Transport,300
+Bills,1200
+Shopping,800
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Project Outcomes
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+* Built a fully serverless expense analytics solution
+* Implemented cloud-based file storage and processing
+* Developed data visualization dashboards
+* Integrated multiple AWS services into a production workflow
+* Demonstrated cloud computing and data engineering concepts
+
+---
+
+## Future Enhancements
+
+* Upload history tracking
+* Advanced file validation
+* AI-powered spending recommendations
+* Multi-user authentication
+* Athena and QuickSight integration
+* Real-time exchange rate support
+
+---
+
+## Author
+
+Vijay Haripriyan
+
+AWS Cloud & Data Engineering Project
