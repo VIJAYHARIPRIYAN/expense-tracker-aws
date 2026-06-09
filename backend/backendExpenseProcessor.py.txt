@@ -1,0 +1,143 @@
+
+import json
+import boto3
+import uuid
+import csv
+import io
+import traceback
+from decimal import Decimal
+
+s3 = boto3.client('s3')
+dynamodb = boto3.resource('dynamodb')
+
+BUCKET_NAME = "expensetracker-rawfiles"
+TABLE_NAME = "FileMetadata"
+
+def lambda_handler(event, context):
+
+    try:
+        body = json.loads(event.get("body", "{}"))
+
+        file_name = body.get("fileName", "unknown.csv")
+        file_type = body.get("fileType", "text/csv")
+        file_content = body.get("fileContent", "")
+
+        file_id = str(uuid.uuid4())
+
+        # Save actual file to S3
+        s3.put_object(
+            Bucket=BUCKET_NAME,
+            Key=f"uploads/{file_name}",
+            Body=file_content
+        )
+
+        # Parse CSV
+        csv_file = io.StringIO(file_content)
+        reader = csv.DictReader(csv_file)
+
+        total_expense = Decimal("0")
+        total_transactions = 0
+        category_summary = {}
+
+        for row in reader:
+
+            category = str(row.get("Category", "Other")).strip()
+
+            amount_text = str(row.get("Amount", "0")).strip()
+
+            try:
+
+                # USD → INR
+                if amount_text.startswith("$"):
+                    amount = Decimal(
+                        amount_text.replace("$", "")
+                        .replace(",", "")
+                        .strip()
+                    ) * Decimal("85")
+
+                # EUR → INR
+                elif amount_text.startswith("€"):
+                    amount = Decimal(
+                        amount_text.replace("€", "")
+                        .replace(",", "")
+                        .strip()
+                    ) * Decimal("98")
+
+                # GBP → INR
+                elif amount_text.startswith("£"):
+                    amount = Decimal(
+                        amount_text.replace("£", "")
+                        .replace(",", "")
+                        .strip()
+                    ) * Decimal("115")
+
+                # INR / Normal Number
+                else:
+                    amount = Decimal(
+                        amount_text
+                        .replace("₹", "")
+                        .replace(",", "")
+                        .strip()
+                    )
+
+            except:
+                amount = Decimal("0")
+
+            total_expense += amount
+            total_transactions += 1
+
+            if category not in category_summary:
+                category_summary[category] = Decimal("0")
+
+            category_summary[category] += amount
+
+        # Convert Decimal values to strings for DynamoDB safety
+        category_summary_db = {
+            k: str(v)
+            for k, v in category_summary.items()
+        }
+
+        table = dynamodb.Table(TABLE_NAME)
+
+        table.put_item(
+            Item={
+                "fileId": file_id,
+                "fileName": file_name,
+                "fileType": file_type,
+                "status": "processed",
+                "totalExpense": str(total_expense),
+                "totalTransactions": total_transactions,
+                "categorySummary": category_summary_db
+            }
+        )
+
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps({
+                "message": "Analytics Generated",
+                "fileId": file_id,
+                "totalExpense": str(total_expense),
+                "totalTransactions": total_transactions,
+                "categorySummary": category_summary_db
+            })
+        }
+
+    except Exception as e:
+
+        print("===== ERROR =====")
+        print(str(e))
+        print(traceback.format_exc())
+
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps({
+                "error": str(e)
+            })
+        }
+

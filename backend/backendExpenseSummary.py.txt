@@ -1,0 +1,52 @@
+import json
+import boto3
+import traceback
+
+dynamodb = boto3.resource('dynamodb')
+
+def lambda_handler(event, context):
+
+    try:
+
+        table = dynamodb.Table('FileMetadata')
+
+        response = table.scan()
+
+        items = response.get('Items', [])
+
+        if len(items) == 0:
+            return {
+                "statusCode": 200,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*"
+                },
+                "body": json.dumps({
+                    "message": "No data found"
+                })
+            }
+
+        latest = items[-1]
+
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps(latest, default=str)
+        }
+
+    except Exception as e:
+
+        print("ERROR")
+        print(str(e))
+        print(traceback.format_exc())
+
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps({
+                "error": str(e)
+            })
+        }
